@@ -2,7 +2,7 @@
   <div>
     <el-row>
       <!-- 左侧 -->
-      <el-col :span="8">
+      <el-col :span="8" style="padding-right: 10px">
         <!-- 用户信息展示 -->
         <el-card class="box-card">
           <div class="user">
@@ -30,13 +30,13 @@
         </el-card>
       </el-col>
       <!-- 右侧 -->
-      <el-col :span="16">
+      <el-col :span="16" style="padding-left: 10px">
         <!-- flex小卡片 -->
         <div class="num">
           <el-card
             v-for="item in countData"
             :key="item.name"
-            :body-style="{ display: 'flex' }"
+            :body-style="{ display: 'flex', padding: 0 }"
           >
             <i
               class="icon"
@@ -49,42 +49,38 @@
             </div>
           </el-card>
         </div>
+        <!-- 折线图 -->
+        <el-card style="height: 280px">
+          <div ref="zhePics" style="height: 280px"></div>
+        </el-card>
+        <!-- 柱状图和饼图 -->
+        <div class="container">
+          <el-card>
+            <div ref="zhuPics" style="height: 260px"></div>
+          </el-card>
+          <el-card>
+            <div ref="bingPics" style="height: 220px"></div>
+          </el-card>
+        </div>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
+import { getData } from "../api";
+import * as echarts from "echarts";
 export default {
   name: "Home",
   data() {
     return {
-      tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄",
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄",
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄",
-        },
-      ],
+      tableData: [],
+      userData: [],
       tableLable: {
-        date: "日期",
-        name: "姓名",
-        address: "地址",
+        name: "课程",
+        todayBuy: "今日购买",
+        monthBuy: "本月购买",
+        totalBuy: "总购买",
       },
       countData: [
         {
@@ -94,37 +90,153 @@ export default {
           color: "#2ec7c9",
         },
         {
-          name: "今日支付订单",
+          name: "昨日支付订单",
           value: 210,
           icon: "success",
           color: "#2ec7c9",
         },
         {
-          name: "今日支付订单",
+          name: "今日返还订单",
           value: 210,
           icon: "success",
           color: "#2ec7c9",
         },
         {
-          name: "今日支付订单",
+          name: "今日总结订单",
           value: 210,
           icon: "success",
           color: "#2ec7c9",
         },
         {
-          name: "今日支付订单",
+          name: "昨日省钱订单",
           value: 210,
           icon: "success",
           color: "#2ec7c9",
         },
         {
-          name: "今日支付订单",
+          name: "今日偿还订单",
           value: 210,
           icon: "success",
           color: "#2ec7c9",
         },
       ],
     };
+  },
+  mounted() {
+    getData().then(({ data }) => {
+      console.log(data.data);
+      const { orderData, tableData, userData, videoData } = data.data;
+      this.tableData = tableData;
+      this.userData = userData;
+
+      // 折线图
+      // console.log(orderData);
+      // 基于准备好的dom，初始化echarts实例
+      var zhePics = echarts.init(this.$refs.zhePics);
+      const xAxis = Object.keys(orderData.data[0]);
+      // 指定图表的配置项和数据
+      var zhePicsOptions = {
+        tooltip: {},
+        legend: {
+          data: xAxis,
+        },
+        xAxis: {
+          data: orderData.date,
+        },
+        yAxis: {},
+        series: [],
+      };
+      xAxis.forEach((key) => {
+        zhePicsOptions.series.push({
+          name: key,
+          data: orderData.data.map((item) => item[key]),
+          type: "line",
+        });
+      });
+      // 使用刚指定的配置项和数据显示图表。
+      zhePics.setOption(zhePicsOptions);
+
+      // 柱状图
+      // console.log(userData);
+      var zhuPics = echarts.init(this.$refs.zhuPics);
+      var zhuPicsOptions = {
+        legend: {
+          // 图例文字颜色
+          textStyle: {
+            color: "#333",
+          },
+        },
+        grid: {
+          left: "20%",
+        },
+        // 提示框
+        tooltip: {
+          trigger: "axis",
+        },
+        xAxis: {
+          type: "category", // 类目轴
+          data: userData.map((item) => item.date),
+          axisLine: {
+            lineStyle: {
+              color: "#17b3a3",
+            },
+          },
+          axisLabel: {
+            interval: 0,
+            color: "#333",
+          },
+        },
+        yAxis: [
+          {
+            type: "value",
+            axisLine: {
+              lineStyle: {
+                color: "#17b3a3",
+              },
+            },
+          },
+        ],
+        color: ["#2ec7c9", "#b6a2de"],
+        series: [
+          {
+            name: "新增用户",
+            data: userData.map((item) => item.new),
+            type: "bar",
+          },
+          {
+            name: "活跃用户",
+            data: userData.map((item) => item.active),
+            type: "bar",
+          },
+        ],
+      };
+      zhuPics.setOption(zhuPicsOptions);
+
+      // 饼状图
+      console.log(videoData);
+      var bingPics = echarts.init(this.$refs.bingPics);
+      var bingPicsOptions = {
+        tooltip: {
+          trigger: "item",
+        },
+        color: [
+          "#0f78f4",
+          "#dd536b",
+          "#9462e5",
+          "#a6a6a6",
+          "#e1bb22",
+          "#39c362",
+          "#3ed1cf",
+        ],
+        series: [
+          {
+            data: videoData,
+            type: "pie",
+          },
+        ],
+      };
+      bingPics.setOption(bingPicsOptions);
+    });
   },
 };
 </script>
@@ -166,6 +278,9 @@ export default {
 }
 
 .num {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   .icon {
     width: 80px;
     height: 80px;
@@ -178,6 +293,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-left: 15px;
     .price {
       font-size: 30px;
       margin-bottom: 10px;
@@ -189,6 +305,20 @@ export default {
       color: #999999;
       text-align: center;
     }
+  }
+  .el-card {
+    width: 32%;
+    margin-bottom: 20px;
+  }
+}
+
+.container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  .el-card {
+    height: 260px;
+    width: 48%;
   }
 }
 </style>

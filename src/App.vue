@@ -20,7 +20,12 @@ export default {
   margin-top: 60px;
 } */
 html,
-body,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 h1,
 h3,
 p {
