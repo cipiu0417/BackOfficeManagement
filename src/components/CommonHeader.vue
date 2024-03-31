@@ -8,7 +8,15 @@
         size="mini"
       ></el-button>
       <!-- 面包屑区域 -->
-      <span class="text">首页</span>
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item
+          v-for="item in tabs"
+          :key="item.path"
+          :to="{ path: item.path }"
+        >
+          {{ item.label }}
+        </el-breadcrumb-item>
+      </el-breadcrumb>
     </div>
     <!-- 右侧区域 -->
     <div class="r-content">
@@ -26,12 +34,24 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 export default {
   name: "CommonHeader",
+  data() {
+    return {};
+  },
   methods: {
     handleMenu() {
       this.$store.commit("collapseMenu");
     },
+  },
+  computed: {
+    ...mapState({
+      tabs: (state) => state.tab.tabList,
+    }),
+  },
+  mounted() {
+    console.log("tabs", this.tabs);
   },
 };
 </script>
@@ -53,6 +73,16 @@ export default {
       font-size: 14px;
       margin-left: 10px;
       font-weight: 400;
+    }
+    .el-breadcrumb {
+      margin-left: 20px;
+      .el-breadcrumb__inner.is-link {
+        color: #666;
+        font-weight: normal;
+      }
+      .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+        color: #fff;
+      }
     }
   }
 

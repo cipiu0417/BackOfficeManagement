@@ -1,5 +1,5 @@
 <template>
-  <div style="height: 100%;">
+  <div style="height: 100%">
     <el-menu
       default-active="1-4-1"
       class="el-menu-vertical-demo"
@@ -104,9 +104,12 @@ export default {
     },
   },
   methods: {
+    // 点击菜单
     clickMenu(item) {
       console.log(item);
       this.$router.push(item.path, () => {});
+      // 修改面包屑区域
+      this.$store.commit("selectMenu", item);
     },
   },
 };
