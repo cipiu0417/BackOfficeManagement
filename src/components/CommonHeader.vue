@@ -51,7 +51,7 @@ export default {
     }),
   },
   mounted() {
-    console.log("tabs", this.tabs);
+    // console.log("tabs", this.tabs);
   },
 };
 </script>

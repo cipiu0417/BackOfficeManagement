@@ -124,7 +124,7 @@ export default {
   },
   mounted() {
     getData().then(({ data }) => {
-      console.log(data.data);
+      // console.log(data.data);
       const { orderData, tableData, userData, videoData } = data.data;
       this.tableData = tableData;
       this.userData = userData;
@@ -213,7 +213,7 @@ export default {
       zhuPics.setOption(zhuPicsOptions);
 
       // 饼状图
-      console.log(videoData);
+      // console.log(videoData);
       var bingPics = echarts.init(this.$refs.bingPics);
       var bingPicsOptions = {
         tooltip: {

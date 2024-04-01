@@ -106,7 +106,7 @@ export default {
   methods: {
     // 点击菜单
     clickMenu(item) {
-      console.log(item);
+      // console.log(item);
       this.$router.push(item.path, () => {});
       // 修改面包屑区域
       this.$store.commit("selectMenu", item);
