@@ -1,8 +1,21 @@
 <template>
   <div class="manage">
-    <!-- 打开弹窗的按钮 -->
-    <el-button type="primary" @click="handleAdd">+ 新增</el-button>
-    <!-- 弹窗中的内容 -->
+    <!-- 头部区域 -->
+    <div class="manage-header">
+      <!-- 打开弹窗的按钮 -->
+      <el-button type="primary" @click="handleAdd">+ 新增</el-button>
+      <!-- 搜索框 -->
+      <el-form :inline="true" label-width="80px" :model="userForm">
+        <el-form-item style="margin-bottom: 0">
+          <el-input placeholder="请输入名称" v-model="userForm.name"></el-input>
+        </el-form-item>
+        <el-form-item style="margin-bottom: 0">
+          <el-button type="primary" @click="handleSearch">查询</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+
+    <!-- 弹窗 -->
     <el-dialog
       title="提示"
       :visible.sync="dialogVisible"
@@ -42,13 +55,15 @@
           <el-input v-model="form.addr" placeholder="请输入地址"></el-input>
         </el-form-item>
       </el-form>
+      <!-- 两个按钮 -->
       <span slot="footer" class="dialog-footer">
         <el-button @click="cancelForm">取 消</el-button>
         <el-button type="primary" @click="submitForm">确 定 </el-button>
       </span>
     </el-dialog>
-    <!-- 表格 -->
-    <el-table :data="tableData" style="width: 100%">
+
+    <!-- 中间区域表格 -->
+    <el-table stripe :data="tableData" style="width: 100%" height="90%">
       <el-table-column prop="name" label="姓名" width="120px">
       </el-table-column>
       <el-table-column prop="age" label="年龄" width="120px"> </el-table-column>
@@ -71,6 +86,16 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 底部区域分页器 -->
+    <div class="manage-footer">
+      <el-pagination
+        layout="prev, pager, next"
+        :total="total"
+        :page-size="20"
+        @current-change="handleChangePage"
+      >
+      </el-pagination>
+    </div>
   </div>
 </template>
 
@@ -103,6 +128,14 @@ export default {
       },
       tableData: [],
       modelType: 0, // 0表示新增，1表示编辑
+      total: 0, //当前页面数据总条数
+      pageData: {
+        page: 1,
+        limit: 20,
+      },
+      userForm: {
+        name: "",
+      },
     };
   },
   methods: {
@@ -196,10 +229,24 @@ export default {
     },
     // 用来获取用户列表
     getUserList() {
-      getUser().then(({ data }) => {
-        console.log("data", data);
-        this.tableData = data.list;
-      });
+      getUser({ params: { ...this.userForm, ...this.pageData } }).then(
+        ({ data }) => {
+          console.log("data", data);
+          this.tableData = data.list;
+          this.total = data.count || 0;
+        }
+      );
+    },
+
+    // 选择页码的回调函数
+    handleChangePage(val) {
+      // console.log(val);
+      this.pageData.page = val;
+      this.getUserList();
+    },
+    // 点击查询按钮
+    handleSearch() {
+      this.getUserList();
     },
   },
   mounted() {
@@ -208,4 +255,19 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="less">
+.manage {
+  height: 90%;
+  position: relative;
+  .manage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .manage-footer {
+    margin-top: 20px;
+    position: absolute;
+    right: 20px;
+  }
+}
+</style>
